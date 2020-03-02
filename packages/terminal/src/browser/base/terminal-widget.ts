@@ -45,19 +45,26 @@ export abstract class TerminalWidget extends BaseWidget {
 
     abstract scrollToTop(): void;
 
+    abstract scrollToBottom(): void;
+
     abstract scrollPageUp(): void;
 
     abstract scrollPageDown(): void;
 
+    abstract resetTerminal(): void;
     /**
      * Event which fires when terminal did closed. Event value contains closed terminal widget definition.
      */
     abstract onTerminalDidClose: Event<TerminalWidget>;
 
+    abstract onTerminalDidDispose: Event<void>;
+
     /**
      * Cleat terminal output.
      */
     abstract clearOutput(): void;
+
+    abstract writeLine(line: string): void;
 
     /**
      * Return Terminal search box widget.
@@ -67,6 +74,8 @@ export abstract class TerminalWidget extends BaseWidget {
      * Whether the terminal process has child processes.
      */
     abstract hasChildProcesses(): Promise<boolean>;
+
+    abstract setTitle(title: string): void;
 }
 
 /**

@@ -48,6 +48,7 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
 
     private readonly TERMINAL = 'Terminal';
     protected readonly onTermDidClose = new Emitter<TerminalWidget>();
+    protected readonly onTermDidDispose = new Emitter<void>();
     protected terminalId = -1;
     protected fitAddon: FitAddon;
     protected term: Terminal;
@@ -79,8 +80,7 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
 
     @postConstruct()
     protected init(): void {
-        this.title.caption = this.options.title || this.TERMINAL;
-        this.title.label = this.options.title || this.TERMINAL;
+        this.setTitle(this.options.title || this.TERMINAL);
         this.title.iconClass = 'fa fa-terminal';
 
         if (this.options.destroyTermOnClose === true) {
@@ -411,7 +411,6 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
         }
         this.toDisposeOnConnect.dispose();
         this.toDispose.push(this.toDisposeOnConnect);
-        this.term.reset();
         const waitForConnection = this.waitForConnection = new Deferred<MessageConnection>();
         this.webSocketConnectionProvider.listen({
             path: `${terminalsPath}/${this.terminalId}`,
@@ -490,6 +489,10 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
         this.term.scrollToTop();
     }
 
+    scrollToBottom(): void {
+        this.term.scrollToBottom();
+    }
+
     scrollPageUp(): void {
         this.term.scrollPages(-1);
     }
@@ -498,8 +501,20 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
         this.term.scrollPages(1);
     }
 
+    resetTerminal(): void {
+        this.term.reset();
+    }
+
+    writeLine(text: string): void {
+        this.term.writeln(text);
+    }
+
     get onTerminalDidClose(): Event<TerminalWidget> {
         return this.onTermDidClose.event;
+    }
+
+    get onTerminalDidDispose(): Event<void> {
+        return this.onTermDidDispose.event;
     }
 
     dispose(): void {
@@ -510,6 +525,8 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
             this.onTermDidClose.fire(this);
             this.onTermDidClose.dispose();
         }
+        this.onTermDidDispose.fire(undefined);
+        this.onTermDidDispose.dispose();
         super.dispose();
     }
 
@@ -558,4 +575,8 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
         this.term.attachCustomKeyEventHandler(e => this.customKeyHandler(e));
     }
 
+    setTitle(title: string): void {
+        this.title.caption = title;
+        this.title.label = title;
+    }
 }
